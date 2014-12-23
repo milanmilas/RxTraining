@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace SequenceBasics
 {
 	class Program
 	{
-		static void Main(string[] args)
+		private static void Main(string[] args)
 		{
 			//SimpleReplaySubject();
 
@@ -20,6 +24,62 @@ namespace SequenceBasics
 			//NonBlockingMethodMain();
 
 			//NonBlocking_event_driven(); Console.ReadLine();
+
+			/* Get all classes that take in ISCheduler */
+			//GetAllIschedulerClasses();
+
+			//Observable.Range();
+
+			//Generate();
+
+			//StartAction();
+
+			//StartFunc();
+
+
+		}
+
+		private static void StartAction()
+		{
+			var start = Observable.Start(() =>
+				{
+					Console.WriteLine("Working away");
+					for (int i = 0; i < 10; i++)
+					{
+						Thread.Sleep(10);
+						Console.WriteLine(".");
+					}
+				});
+
+			start.Subscribe(unit => Console.WriteLine("Unit published"),
+			                () => Console.WriteLine("Action Completed"));
+
+			Console.ReadLine();
+		}
+
+		static void StartFunc()
+		{
+			var start = Observable.Start(() =>
+			{
+				Console.Write("Working away");
+				for (int i = 0; i < 10; i++)
+				{
+					Thread.Sleep(100);
+					Console.Write(".");
+				}
+				return "Published value";
+			});
+			start.Subscribe(
+			Console.WriteLine,
+			() => Console.WriteLine("Action completed"));
+
+			Console.ReadKey();
+		}
+
+		private static void Range()
+		{
+			var range = Observable.Range(10, 15);
+			range.Subscribe(Console.WriteLine, () => Console.WriteLine("Completed!"));
 		}
 
 		private static void SimpleEmpty()
@@ -115,6 +175,65 @@ namespace SequenceBasics
 				);
 
 			observable.Subscribe(Console.WriteLine);
+		}
+
+		private static void GetAllIschedulerClasses()
+		{
+			var withScheduler = (from m in typeof(Observable).GetMethods()
+								 from p in m.GetParameters()
+								 where p.ParameterType == typeof(IScheduler)
+								 orderby m.Name
+								 select m.Name)
+					.Distinct();
+
+			foreach (var method in withScheduler)
+				Console.WriteLine(method);
+
+			#region Console Output Result
+			//Buffer
+			//Case
+			//Delay
+			//DelaySubscription
+			//Empty
+			//FromEvent
+			//FromEventPattern
+			//Generate
+			//If
+			//Interval
+			//Merge
+			//ObserveOn
+			//Range
+			//Repeat
+			//Replay
+			//Return
+			//Sample
+			//Skip
+			//SkipLast
+			//SkipUntil
+			//Start
+			//StartWith
+			//Subscribe
+			//SubscribeOn
+			//Take
+			//TakeLast
+			//TakeLastBuffer
+			//TakeUntil
+			//Throttle
+			//Throw
+			//TimeInterval
+			//Timeout
+			//Timer
+			//Timestamp
+			//ToAsync
+			//ToObservable
+			//Window
+			#endregion
+		}
+
+		private static void Generate()
+		{
+			var subject = Observable.Generate(1, i => i < 11, i => i + 2, i => i * i);
+			subject.Subscribe(Console.WriteLine);
 		}
 	}
 }
